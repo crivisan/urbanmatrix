@@ -12,8 +12,8 @@ email=crivisan1994@gmail.com
 
 about=A plugin to automate and apply Matrix Method for urban applications.
 
-tracker=https://github.com/crivisan/UrbanMatrix/issues
-repository=https://github.com/crivisan/UrbanMatrix
+tracker=https://github.com/crivisan/urbanmatrix/issues
+repository=https://github.com/crivisan/urbanmatrix
 # End of mandatory metadata
 
 # Recommended items:
