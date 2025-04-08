@@ -6,7 +6,7 @@ from qgis.utils import iface
 import processing
 
 
-def create_grid_from_raster(raster_layer, cell_size, crs="EPSG:3857", grid_name="UrbanMatrix_Grid"):
+def create_grid_from_raster(raster_layer, cell_size, grid_name="UrbanMatrix_Grid"):
     """
     Generate a grid layer over the extent of a raster image.
 

@@ -5,8 +5,9 @@ from qgis.PyQt.QtWidgets import (
     QDesktopWidget,QFileDialog,
 )
 from qgis.PyQt.QtCore import pyqtSignal
-from qgis.core import QgsProject, QgsRasterLayer
+from qgis.core import QgsProject, QgsRasterLayer, QgsVectorLayer
 from .utils.grid_tools import create_grid_from_raster
+from .utils.data_ingestion import download_ms_buildings_from_extent
 
 
 class UrbanMatrixDockWidget(QDockWidget):
@@ -34,11 +35,11 @@ class UrbanMatrixDockWidget(QDockWidget):
         self.rasterCombo = QComboBox()
         self.layout.addWidget(self.raster_label)
         self.layout.addWidget(self.rasterCombo)
+
         # --- Import Raster Button ---
         self.importRasterBtn = QPushButton("Import Raster Image")
         self.layout.addWidget(self.importRasterBtn)
         self.importRasterBtn.clicked.connect(self.import_raster)
-
 
         # --- Grid Cell Size Input ---
         self.size_label = QLabel("Grid cell size (map units):")
@@ -56,6 +57,18 @@ class UrbanMatrixDockWidget(QDockWidget):
 
         # Fill combo with raster layers
         self.populate_raster_combo()
+
+        # --- External Layer Download Section ---
+        self.downloadLabel = QLabel("Download external data:")
+        self.externalSourceCombo = QComboBox()
+        self.externalSourceCombo.addItems(["Microsoft Buildings"])  # Add more later
+        self.downloadBtn = QPushButton("Download")
+
+        self.layout.addWidget(self.downloadLabel)
+        self.layout.addWidget(self.externalSourceCombo)
+        self.layout.addWidget(self.downloadBtn)
+
+        self.downloadBtn.clicked.connect(self.download_selected_layer)
 
 
     def closeEvent(self, event):
@@ -88,7 +101,7 @@ class UrbanMatrixDockWidget(QDockWidget):
             return
 
         try:
-            create_grid_from_raster(raster_layer, cell_size)
+            create_grid_from_raster(raster_layer, cell_size, "UrbanMatrix_Grid")
             self.show_message("Grid created successfully.")
         except Exception as e:
             self.show_message(f"Error: {e}")
@@ -121,3 +134,24 @@ class UrbanMatrixDockWidget(QDockWidget):
         if index >= 0:
             self.rasterCombo.setCurrentIndex(index)
         self.show_message(f"Raster '{layer_name}' loaded successfully.")
+
+    def download_selected_layer(self):
+        source = self.externalSourceCombo.currentText()
+        # Try to get the grid layer by name
+        grid_layer = QgsProject.instance().mapLayersByName("UrbanMatrix_Grid")
+        if not grid_layer:
+            self.show_message("No grid found. Please generate one first.")
+            return
+
+        grid_layer = grid_layer[0]
+        extent_ = grid_layer.extent()
+        extent = (extent_.xMinimum(), extent_.yMinimum(), extent_.xMaximum(), extent_.yMaximum())
+        crs = grid_layer.crs().authid()
+
+        if source == "Microsoft Buildings":
+            layer = download_ms_buildings_from_extent(extent, crs)
+            if layer:
+                QgsProject.instance().addMapLayer(layer)
+                self.show_message("Microsoft buildings downloaded.")
+            else:
+                self.show_message("Download failed.")
