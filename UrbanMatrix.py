@@ -30,6 +30,14 @@ from .resources import *
 # Import the code for the DockWidget
 from .UrbanMatrix_dockwidget import UrbanMatrixDockWidget
 import os.path
+import sys
+main_dir = os.path.dirname(os.path.abspath(__file__))
+if main_dir not in sys.path:
+    sys.path.insert(0, main_dir)
+
+
+# connecting functionalities
+from .utils.grid_tools import create_grid_from_raster
 
 
 class UrbanMatrix:
@@ -139,7 +147,6 @@ class UrbanMatrix:
             added to self.actions list.
         :rtype: QAction
         """
-
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
@@ -167,7 +174,7 @@ class UrbanMatrix:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/UrbanMatrix/icon.png'
+        icon_path = os.path.join(self.plugin_dir, 'icon.png')
         self.add_action(
             icon_path,
             text=self.tr(u'UrbanMatrix'),
@@ -228,5 +235,5 @@ class UrbanMatrix:
 
             # show the dockwidget
             # TODO: fix to allow choice of dock location
-            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget)
+            #self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget) #permanently docking panels
             self.dockwidget.show()
