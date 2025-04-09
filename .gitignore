@@ -134,3 +134,10 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+utils/test.py
+
+/__pycache__/
+**/__pycache__
+**/.pyc
+__pycache__/UrbanMatrix_dockwidget.cpython-312.pyc
+utils/__pycache__/data_ingestion.cpython-312.pyc

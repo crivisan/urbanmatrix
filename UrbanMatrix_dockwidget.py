@@ -8,6 +8,7 @@ from qgis.PyQt.QtCore import pyqtSignal
 from qgis.core import QgsProject, QgsRasterLayer, QgsVectorLayer
 from .utils.grid_tools import create_grid_from_raster
 from .utils.data_ingestion import download_ms_buildings_from_extent
+from .utils.classification import calculate_coverage
 
 
 class UrbanMatrixDockWidget(QDockWidget):
@@ -70,6 +71,27 @@ class UrbanMatrixDockWidget(QDockWidget):
 
         self.downloadBtn.clicked.connect(self.download_selected_layer)
 
+        # Fill combo with raster layers
+        #self.populate_classify_layer_combo()
+
+        # --- Applicaitons: Classification Section ---
+        self.gridLayerLabel = QLabel("Select Grid Layer:")
+        self.gridLayerCombo = QComboBox()
+
+        self.featureLayerLabel = QLabel("Select Feature Layer (e.g. buildings):")
+        self.classifyLayerCombo = QComboBox()
+
+        self.layout.addWidget(self.gridLayerLabel)
+        self.layout.addWidget(self.gridLayerCombo)
+        self.layout.addWidget(self.featureLayerLabel)
+        self.layout.addWidget(self.classifyLayerCombo)
+        self.runClassificationBtn = QPushButton("Run Classification")
+        self.layout.addWidget(self.runClassificationBtn)
+
+        self.runClassificationBtn.clicked.connect(self.classify_grid_coverage)
+        
+        # Fill combo with raster layers
+        self.populate_classify_layer_combo()
 
     def closeEvent(self, event):
         self.closingPlugin.emit()
@@ -80,6 +102,19 @@ class UrbanMatrixDockWidget(QDockWidget):
         for layer in QgsProject.instance().mapLayers().values():
             if isinstance(layer, QgsRasterLayer):
                 self.rasterCombo.addItem(layer.name(), layer.id())
+
+    def populate_classify_layer_combo(self):
+        """Populates both grid and feature layer dropdowns."""
+        self.gridLayerCombo.clear()
+        self.classifyLayerCombo.clear()
+
+        for layer in QgsProject.instance().mapLayers().values():
+            if layer.type() == QgsVectorLayer.VectorLayer:
+                name = layer.name()
+                self.gridLayerCombo.addItem(name, layer.id())
+                if layer.geometryType() in [1, 2]:  # Line or Polygon for features
+                    self.classifyLayerCombo.addItem(name, layer.id())
+
 
     def run_grid_generator(self):
         layer_id = self.rasterCombo.currentData()
@@ -155,3 +190,25 @@ class UrbanMatrixDockWidget(QDockWidget):
                 self.show_message("Microsoft buildings downloaded.")
             else:
                 self.show_message("Download failed.")
+
+    def classify_grid_coverage(self):
+        grid_id = self.gridLayerCombo.currentData()
+        feature_id = self.classifyLayerCombo.currentData()
+
+        if not grid_id or not feature_id:
+            self.show_message("Please select both grid and feature layers.")
+            return
+
+        grid_layer = QgsProject.instance().mapLayer(grid_id)
+        feature_layer = QgsProject.instance().mapLayer(feature_id)
+
+        if not grid_layer or not feature_layer:
+            self.show_message("Invalid layers selected.")
+            return
+
+        try:
+            updated_grid = calculate_coverage(grid_layer, feature_layer, output_field="coverage_pct")
+            QgsProject.instance().addMapLayer(updated_grid)
+            self.show_message("Classification complete. Grid updated with 'coverage_pct'.")
+        except Exception as e:
+            self.show_message(f"Classification failed: {e}")
