@@ -136,8 +136,15 @@ dist
 .pnp.*
 utils/test.py
 
-/__pycache__/
-**/__pycache__
-**/.pyc
-__pycache__/UrbanMatrix_dockwidget.cpython-312.pyc
-utils/__pycache__/data_ingestion.cpython-312.pyc
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore QGIS temporary files
+*.qgd
+*.aux.xml
+*.db
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
