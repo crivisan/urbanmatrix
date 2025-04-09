@@ -64,6 +64,7 @@ def download_ms_buildings_from_extent(extent, crs="EPSG:4326"):
             gdf = gdf.to_crs(crs)
             gdf = gdf[gdf.geometry.intersects(rect_geom)]
             buildings_gdf = pd.concat([buildings_gdf, gdf], ignore_index=True)
+            buildings_gdf = buildings_gdf.drop(['properties'], axis=1)
 
         except Exception as e:
             print(f"[ERROR] Could not download {qk}: {e}")

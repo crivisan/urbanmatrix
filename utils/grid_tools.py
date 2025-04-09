@@ -4,17 +4,12 @@ from qgis.core import (
 )
 from qgis.utils import iface
 import processing
+from .styling import style_grid
 
 
 def create_grid_from_raster(raster_layer, cell_size, grid_name="UrbanMatrix_Grid"):
     """
     Generate a grid layer over the extent of a raster image.
-
-    :param raster_layer: QgsRasterLayer loaded in the QGIS project.
-    :param cell_size: Grid cell size in map units.
-    :param crs: Coordinate reference system (default: EPSG:3857).
-    :param grid_name: Name for the output grid layer.
-    :return: QgsVectorLayer grid layer.
     """
     if not raster_layer:
         raise ValueError("Raster layer is not provided.")
@@ -35,6 +30,7 @@ def create_grid_from_raster(raster_layer, cell_size, grid_name="UrbanMatrix_Grid
     result = processing.run("qgis:creategrid", params)
     grid_layer = result['OUTPUT']
     QgsProject.instance().addMapLayer(grid_layer)
+    style_grid(grid_layer) # CALLING IT HERE
 
     # Zoom to the new grid layer
     iface.mapCanvas().setExtent(grid_layer.extent())

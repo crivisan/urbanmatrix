@@ -10,12 +10,14 @@ from .utils.grid_tools import create_grid_from_raster
 from .utils.data_ingestion import download_ms_buildings_from_extent
 from .utils.classification import calculate_coverage
 from .utils.matrix_calculation import assign_matrix_scores
+from .utils.styling import style_by_density_class, style_buildings_footprint
 
 
 class UrbanMatrixDockWidget(QDockWidget):
     closingPlugin = pyqtSignal()
 
     def __init__(self, parent=None):
+        QgsProject.instance().layerWasAdded.connect(self.refresh_layer_dropdowns)
         super().__init__(parent)
         self.setFloating(True)
         #self.resize(400, 300)  # Optional: set initial size
@@ -72,10 +74,8 @@ class UrbanMatrixDockWidget(QDockWidget):
 
         self.downloadBtn.clicked.connect(self.download_selected_layer)
 
-        # Fill combo with raster layers
-        #self.populate_classify_layer_combo()
-
         # --- Applicaitons: Classification Section ---
+        #self.refresh_layer_dropdowns()
         self.gridLayerLabel = QLabel("Select Grid Layer:")
         self.gridLayerCombo = QComboBox()
 
@@ -90,9 +90,7 @@ class UrbanMatrixDockWidget(QDockWidget):
         self.layout.addWidget(self.runClassificationBtn)
 
         self.runClassificationBtn.clicked.connect(self.classify_grid_coverage)
-        
-        # Fill combo with raster layers
-        self.populate_classify_layer_combo()
+
 
     def closeEvent(self, event):
         self.closingPlugin.emit()
@@ -104,18 +102,20 @@ class UrbanMatrixDockWidget(QDockWidget):
             if isinstance(layer, QgsRasterLayer):
                 self.rasterCombo.addItem(layer.name(), layer.id())
 
-    def populate_classify_layer_combo(self):
-        """Populates both grid and feature layer dropdowns."""
+    def refresh_layer_dropdowns(self):
+        """Refresh both grid and feature layer dropdowns based on current project layers."""
         self.gridLayerCombo.clear()
         self.classifyLayerCombo.clear()
 
         for layer in QgsProject.instance().mapLayers().values():
             if layer.type() == QgsVectorLayer.VectorLayer:
-                name = layer.name()
-                self.gridLayerCombo.addItem(name, layer.id())
-                if layer.geometryType() in [1, 2]:  # Line or Polygon for features
-                    self.classifyLayerCombo.addItem(name, layer.id())
+                self.gridLayerCombo.addItem(layer.name(), layer.id())
+                if layer.geometryType() in [1, 2]:  # Line or Polygon
+                    self.classifyLayerCombo.addItem(layer.name(), layer.id())
 
+
+    def show_message(self, message):
+        QMessageBox.information(self, "UrbanMatrix", message)
 
     def run_grid_generator(self):
         layer_id = self.rasterCombo.currentData()
@@ -141,9 +141,6 @@ class UrbanMatrixDockWidget(QDockWidget):
             self.show_message("Grid created successfully.")
         except Exception as e:
             self.show_message(f"Error: {e}")
-
-    def show_message(self, message):
-        QMessageBox.information(self, "UrbanMatrix", message)
 
     def import_raster(self):
         """Browse and load a raster file into the QGIS project."""
@@ -188,6 +185,7 @@ class UrbanMatrixDockWidget(QDockWidget):
             layer = download_ms_buildings_from_extent(extent, crs)
             if layer:
                 QgsProject.instance().addMapLayer(layer)
+                style_buildings_footprint(layer)
                 self.show_message("Microsoft buildings downloaded.")
             else:
                 self.show_message("Download failed.")
@@ -211,5 +209,6 @@ class UrbanMatrixDockWidget(QDockWidget):
             updated_grid = calculate_coverage(grid_layer, feature_layer)
             assign_matrix_scores(updated_grid)
             QgsProject.instance().addMapLayer(updated_grid)
+            style_by_density_class(updated_grid)
         except Exception as e:
             self.show_message(f"Classification failed: {e}")
