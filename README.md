@@ -65,6 +65,7 @@ You're welcome to try it, suggest improvements, or contribute!
 
 **Developed by:** Cristhian Sanchez - DFKI\
 **Email:** [crivisan1994@gmail.com](mailto:crivisan1994@gmail.com)  
-**GitHub:** [github.com/crivisan](https://github.com/crivisan)
+**GitHub:** [github.com/crivisan](https://github.com/crivisan)\
+**Linkedin:** [linkedin.com/crivisan](https://www.linkedin.com/in/crivisan/)
 
 Feel free to reach out for questions, feedback, or collaborations
