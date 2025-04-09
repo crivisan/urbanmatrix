@@ -37,6 +37,7 @@ It automates grid creation, layer import, building coverage analysis, classifica
 6. Run Matrix Method classification
 7. Explore your results and export if needed
 
+
 ---
 
 ## 📷 Screenshots / Demos
@@ -44,7 +45,7 @@ It automates grid creation, layer import, building coverage analysis, classifica
 <table>
   <tr>
     <td align="center">
-      <img src="screenshot.png" alt="UrbanMatrix Screenshot" width="310"/>
+      <img src="screenshot2.png" alt="UrbanMatrix Screenshot" width="310"/>
       <p><strong>Screenshot</strong></p>
     </td>
     <td align="center">
