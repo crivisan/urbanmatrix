@@ -39,13 +39,23 @@ It automates grid creation, layer import, building coverage analysis, classifica
 
 ---
 
-## 📷 Screenshots
+## 📷 Screenshots / Demos
 
-<p align="center">
-  <img src="screenshot.png" alt="UrbanMatrix Logo" width="500"/>
-</p>
+<table>
+  <tr>
+    <td align="center">
+      <img src="screenshot.png" alt="UrbanMatrix Screenshot" width="310"/>
+      <p><strong>Screenshot</strong></p>
+    </td>
+    <td align="center">
+      <a href="https://youtu.be/xgnYrgwS6Fc">
+        <img src="https://img.youtube.com/vi/xgnYrgwS6Fc/0.jpg" alt="Demo Video" width="400">
+      </a>
+      <p><strong><a href="https://youtu.be/xgnYrgwS6Fc">Watch Demo Video</a></strong></p>
+    </td>
+  </tr>
+</table>
 
----
 
 ## 🧪 Current Status
 
