@@ -11,7 +11,7 @@
 
 ## 💡 About the Plugin
 
-**UrbanMatrix** helps urban planners and researchers apply the Matrix Method for environmental assessment.  
+**UrbanMatrix** helps urban planners and researchers apply the Matrix Method for multiple applications (Currently Developed for Building Density).\
 It automates grid creation, layer import, building coverage analysis, classification, and styled visualization — all in one go.
 
 ---
@@ -19,7 +19,7 @@ It automates grid creation, layer import, building coverage analysis, classifica
 ## 🚀 Features
 
 - 📐 Generate spatial grids of any resolution
-- 🏢 Import Microsoft building footprints directly from the web
+- 🏢 Download and Postprocess Global ML Building Footprints from Microsoft
 - 🧮 Calculate per-cell `application` --> currently implemented `Building Density`
 - 🎯 Automatically assign Matrix Method risk classes
 - 🎨 Predefined styling for buildings and classification results
