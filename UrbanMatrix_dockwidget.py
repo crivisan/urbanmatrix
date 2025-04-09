@@ -9,6 +9,7 @@ from qgis.core import QgsProject, QgsRasterLayer, QgsVectorLayer
 from .utils.grid_tools import create_grid_from_raster
 from .utils.data_ingestion import download_ms_buildings_from_extent
 from .utils.classification import calculate_coverage
+from .utils.matrix_calculation import assign_matrix_scores
 
 
 class UrbanMatrixDockWidget(QDockWidget):
@@ -85,7 +86,7 @@ class UrbanMatrixDockWidget(QDockWidget):
         self.layout.addWidget(self.gridLayerCombo)
         self.layout.addWidget(self.featureLayerLabel)
         self.layout.addWidget(self.classifyLayerCombo)
-        self.runClassificationBtn = QPushButton("Run Classification")
+        self.runClassificationBtn = QPushButton("Run Matrix Method classification") #Matrix Method classification (coverage + risk score)
         self.layout.addWidget(self.runClassificationBtn)
 
         self.runClassificationBtn.clicked.connect(self.classify_grid_coverage)
@@ -207,8 +208,8 @@ class UrbanMatrixDockWidget(QDockWidget):
             return
 
         try:
-            updated_grid = calculate_coverage(grid_layer, feature_layer, output_field="coverage_pct")
+            updated_grid = calculate_coverage(grid_layer, feature_layer)
+            assign_matrix_scores(updated_grid)
             QgsProject.instance().addMapLayer(updated_grid)
-            self.show_message("Classification complete. Grid updated with 'coverage_pct'.")
         except Exception as e:
             self.show_message(f"Classification failed: {e}")

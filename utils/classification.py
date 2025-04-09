@@ -1,50 +1,75 @@
 import geopandas as gpd
-import tempfile
-import json
-import os
-from qgis.core import QgsVectorLayer, QgsProject, QgsVectorFileWriter
+from qgis.core import (
+    QgsVectorLayer,
+    QgsFeature,
+    QgsGeometry,
+    QgsField,
+    QgsFields,
+    QgsProject,
+    QgsWkbTypes,
+    QgsCoordinateReferenceSystem,
+    QgsVectorFileWriter,
+    QgsVectorDataProvider
+)
 from qgis.PyQt.QtCore import QVariant
+import tempfile
+import os
+import pandas as pd
 
 def calculate_coverage(grid_layer, feature_layer, output_field="coverage_pct"):
     """
-    In-memory GeoPandas coverage calculation using QgsVectorLayer inputs.
+    Calculates % coverage of features within each grid cell and returns a memory layer.
     """
-    # Step 1: Save both layers to temp GeoJSON
+    # Save layers to temporary GeoJSONs
     temp_dir = tempfile.gettempdir()
     grid_path = os.path.join(temp_dir, "temp_grid.geojson")
     feature_path = os.path.join(temp_dir, "temp_buildings.geojson")
-    output_path = os.path.join(temp_dir, "grid_with_coverage.geojson")
 
     QgsVectorFileWriter.writeAsVectorFormat(grid_layer, grid_path, "UTF-8", grid_layer.crs(), "GeoJSON")
     QgsVectorFileWriter.writeAsVectorFormat(feature_layer, feature_path, "UTF-8", feature_layer.crs(), "GeoJSON")
 
-    # Step 2: Load into GeoPandas
+    # Load into GeoDataFrames
     grid = gpd.read_file(grid_path)
-    buildings = gpd.read_file(feature_path)
+    features = gpd.read_file(feature_path)
 
-    # Ensure CRS match
-    if grid.crs != buildings.crs:
-        buildings = buildings.to_crs(grid.crs)
+    if grid.crs != features.crs:
+        features = features.to_crs(grid.crs)
 
-    # Step 3: Calculate area
+    # Compute area
     grid["cell_area"] = grid.geometry.area
     grid = grid.reset_index().rename(columns={"index": "grid_id"})
 
-    # Clip buildings to grid
-    clipped = gpd.overlay(buildings, grid, how="intersection")
+    # Clip and compute area
+    clipped = gpd.overlay(features, grid, how="intersection")
     clipped["building_area"] = clipped.geometry.area
 
-    # Aggregate per cell
-    area_per_cell = clipped.groupby("grid_id")["building_area"].sum().reset_index()
-    area_per_cell.columns = ["grid_id", "total_building_area"]
+    # Aggregate
+    stats = clipped.groupby("grid_id")["building_area"].sum().reset_index()
+    grid = grid.merge(stats, on="grid_id", how="left").fillna(0)
+    grid[output_field] = (grid["building_area"] / grid["cell_area"]) * 100
 
-    # Merge and compute %
-    grid = grid.merge(area_per_cell, on="grid_id", how="left")
-    grid["total_building_area"] = grid["total_building_area"].fillna(0)
-    grid[output_field] = (grid["total_building_area"] / grid["cell_area"]) * 100
+    # Build QGIS memory layer
+    crs = QgsCoordinateReferenceSystem(grid_layer.crs().authid())
+    fields = QgsFields()
+    for col in grid.columns:
+        if col == "geometry":
+            continue
+        dtype = QVariant.String
+        if pd.api.types.is_numeric_dtype(grid[col]):
+            dtype = QVariant.Double
+        fields.append(QgsField(col, dtype))
 
-    # Step 4: Save to temp file and reload as QgsVectorLayer
-    grid.to_file(output_path, driver="GeoJSON")
-    output_layer = QgsVectorLayer(output_path, "Grid with Coverage", "ogr")
+    mem_layer = QgsVectorLayer(f"Polygon?crs={crs.authid()}", "Grid with Coverage", "memory")
+    mem_provider = mem_layer.dataProvider()
+    mem_provider.addAttributes(fields)
+    mem_layer.updateFields()
 
-    return output_layer
+    for _, row in grid.iterrows():
+        feat = QgsFeature()
+        feat.setFields(fields)
+        feat.setGeometry(QgsGeometry.fromWkt(row.geometry.wkt))
+        feat.setAttributes([row[col] for col in grid.columns if col != "geometry"])
+        mem_provider.addFeature(feat)
+
+    mem_layer.updateExtents()
+    return mem_layer
