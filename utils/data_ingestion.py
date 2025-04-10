@@ -4,9 +4,19 @@ import geopandas as gpd
 import pandas as pd
 import requests
 from shapely.geometry import shape, box
-import mercantile
 from qgis.core import QgsVectorLayer, QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsProject
 
+try:
+    import mercantile
+except ImportError:
+    from qgis.PyQt.QtWidgets import QMessageBox
+    QMessageBox.critical(
+        None,
+        "Missing Dependency",
+        "The 'mercantile' library is required for UrbanMatrix to work.\n\n"
+        "Please install it using the OSGeo4W Shell:\n\npip install mercantile"
+    )
+    raise
 
 
 def download_ms_buildings_from_extent(extent, crs="EPSG:4326"):

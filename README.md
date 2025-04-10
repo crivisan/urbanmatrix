@@ -57,7 +57,7 @@ It automates grid creation, layer import, building coverage analysis, classifica
   </tr>
 </table>
 
-
+---
 ## 🧪 Current Status
 
 This is a **beta release** — fully working but open for feedback and polish.  
@@ -65,10 +65,34 @@ You're welcome to try it, suggest improvements, or contribute!
 
 ---
 
-## 🔧 Installation (Developer Mode)
+## 🔧 Installation
 
+### 📦 From QGIS Plugin Manager (Recommended)
+1. Open QGIS
+2. Go to **Plugins > Manage and Install Plugins**
+3. Search for **UrbanMatrix**
+4. Click **Install Plugin**
+
+### 👩‍💻 Developer Mode (Manual Installation)
 1. Clone or download this repository
-2. Copy it into your QGIS plugins folder:
+2. Copy the folder to your QGIS plugin directory:
+   - Windows: `C:\Users\<username>\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\`
+   - Linux/macOS: `~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/`
+3. Restart QGIS
+
+---
+## 🧩 Dependencies
+
+UrbanMatrix uses the Python library [`mercantile`](https://pypi.org/project/mercantile/) to work with quadkeys and tile grids.
+
+### 🛠 How to Install
+
+If you're running QGIS on Windows, install it using the **OSGeo4W Shell**:
+```bash
+pip install mercantile
+```
+If you're on Linux/macOS with a standalone QGIS install, activate your environment and run the same command.
+
 
 ---
 
