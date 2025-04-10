@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="icon.png" alt="UrbanMatrix Logo" width="150"/>
+  <img src="icon_readme.png" alt="UrbanMatrix Logo" width="150"/>
 </p>
 
 <h1 align="center">UrbanMatrix</h1>
