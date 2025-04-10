@@ -6,9 +6,7 @@ version=0.1.0
 author=Cristhian Sanchez
 email=crivisan1994@gmail.com
 
-about=UrbanMatrix helps urban planners and researchers apply the Matrix Method for environmental assessment. \
-It automates grid creation, spatial classification (e.g., building density), and applies predefined risk scoring. \
-Includes styled visual outputs, easy layer downloads, and a clean user interface within QGIS.
+about=UrbanMatrix helps urban planners and researchers apply the Matrix Method for environmental assessment. It automates grid creation, spatial classification (e.g., building density), and applies predefined risk scoring. Includes styled visual outputs, easy layer downloads, and a clean user interface within QGIS.
 
 tracker=https://github.com/crivisan/urbanmatrix/issues
 repository=https://github.com/crivisan/urbanmatrix
