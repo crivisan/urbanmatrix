@@ -2,7 +2,7 @@
 name=UrbanMatrix
 qgisMinimumVersion=3.16
 description=Apply the Matrix Method to urban spatial data using a customizable classification and visualization workflow.
-version=0.1.0
+version=0.1.1
 author=Cristhian Sanchez
 email=crivisan1994@gmail.com
 
