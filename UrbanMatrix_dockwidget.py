@@ -87,8 +87,23 @@ class UrbanMatrixDockWidget(QDockWidget):
         self.layout.addWidget(self.featureLayerLabel)
         self.layout.addWidget(self.classifyLayerCombo)
         self.runClassificationBtn = QPushButton("Run Matrix Method classification") #Matrix Method classification (coverage + risk score)
+        ### add classification thresholds
+        self.thresholdLabel = QLabel("Set classification thresholds (%):")
+        self.lowThreshInput = QLineEdit()
+        self.lowThreshInput.setPlaceholderText("Low / Moderate (default: 25)")
+        self.lowThreshInput.setText("25")
+        self.midThreshInput = QLineEdit()
+        self.midThreshInput.setPlaceholderText("Moderate / High (default: 50)")
+        self.midThreshInput.setText("50")
+        self.highThreshInput = QLineEdit()
+        self.highThreshInput.setPlaceholderText("High / Very High (default: 75)")
+        self.highThreshInput.setText("75")
+        self.layout.addWidget(self.thresholdLabel)
+        self.layout.addWidget(self.lowThreshInput)
+        self.layout.addWidget(self.midThreshInput)
+        self.layout.addWidget(self.highThreshInput)
+        ## Connect button action
         self.layout.addWidget(self.runClassificationBtn)
-
         self.runClassificationBtn.clicked.connect(self.classify_grid_coverage)
 
 
@@ -207,7 +222,19 @@ class UrbanMatrixDockWidget(QDockWidget):
 
         try:
             updated_grid = calculate_coverage(grid_layer, feature_layer)
-            assign_matrix_scores(updated_grid)
+            # Get threshold values
+            try:
+                low = float(self.lowThreshInput.text())
+                mid = float(self.midThreshInput.text())
+                high = float(self.highThreshInput.text())
+            except ValueError:
+                self.show_message("Please enter valid numeric thresholds.")
+                return
+            #Validate Threshold Logic
+            if not (0 <= low < mid < high <= 100):
+                self.show_message("Thresholds must be in increasing order between 0 and 100.")
+                return
+            assign_matrix_scores(updated_grid, low, mid, high)
             QgsProject.instance().addMapLayer(updated_grid)
             style_by_density_class(updated_grid)
         except Exception as e:

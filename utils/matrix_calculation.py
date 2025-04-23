@@ -1,7 +1,42 @@
 from qgis.core import QgsField, QgsFeature
 from qgis.PyQt.QtCore import QVariant
 
-def assign_matrix_scores(layer, input_field="coverage_pct", output_field="density_class"):
+def assign_matrix_scores(layer, low_thresh=25, mid_thresh=50, high_thresh=75,
+                         input_field="coverage_pct", output_field="density_class"):
+    from qgis.core import QgsField
+    from qgis.PyQt.QtCore import QVariant
+
+    if output_field not in [f.name() for f in layer.fields()]:
+        layer.dataProvider().addAttributes([QgsField(output_field, QVariant.String)])
+        layer.updateFields()
+
+    field_index = layer.fields().indexOf(output_field)
+
+    for feature in layer.getFeatures():
+        try:
+            pct = float(feature[input_field])
+        except (TypeError, ValueError):
+            pct = None
+
+        if pct is None:
+            category = "NoData"
+        elif pct < low_thresh:
+            category = "Low"
+        elif pct < mid_thresh:
+            category = "Moderate"
+        elif pct < high_thresh:
+            category = "High"
+        else:
+            category = "Very High"
+
+        feature.setAttribute(field_index, category)
+        layer.dataProvider().changeAttributeValues({feature.id(): {field_index: category}})
+
+    layer.updateFields()
+    layer.triggerRepaint()
+
+
+def assign_matrix_scores2(layer, input_field="coverage_pct", output_field="density_class"):
     """
     Assigns Matrix Method risk category based on coverage percentage.
     """
