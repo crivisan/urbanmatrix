@@ -10,6 +10,7 @@ about=UrbanMatrix helps urban planners and researchers apply the Matrix Method f
 
 tracker=https://github.com/crivisan/urbanmatrix/issues
 repository=https://github.com/crivisan/urbanmatrix
+homepage=https://github.com/crivisan/urbanmatrix
 icon=icon.png
 
 hasProcessingProvider=no
